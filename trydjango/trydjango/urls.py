@@ -25,7 +25,7 @@ from accounts.views import (
     logout_view,
     register_view,
 )
-
+#adding some change
 urlpatterns = [
     path('', home_view),
     path('login/',login_view),
