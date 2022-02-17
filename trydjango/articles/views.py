@@ -1,6 +1,6 @@
 from http.client import HTTPResponse
-from django.http import HttpResponse
-from django.shortcuts import render
+from django.http import HttpResponse, Http404
+from django.shortcuts import render, redirect
 from articles.models import Article
 from django.template.loader import render_to_string
 from random import randint
@@ -11,26 +11,6 @@ from .forms import ArticleForm
 
 def article_home_view(request):
     return HttpResponse()
-
-def article_search_view(request):
-
-    query_dict = request.GET
-    # query = query_dict.get("q")
-
-    try:
-        query = int(query_dict.get("q"))
-    except:
-        query = None
-
-    article_obj = None
-    if query is not None:
-        article_obj = Article.objects.get(id=query)
-    context = {
-        "object":article_obj
-    }
-
-    return render(request, "articles/search.html", context=context)
-
 
 def home_view(request, *args, **kwargs):
     random_id = randint(1, 2)
@@ -54,10 +34,15 @@ def home_view(request, *args, **kwargs):
     
     return HttpResponse(HTML_STRING)
 
-def article_detail_view(request, id=None):
+def article_detail_view(request, slug=None):
     article_obj=None
-    if id is not None:
-        article_obj = Article.objects.get(id=id)
+    if slug is not None:
+        try:
+            article_obj = Article.objects.get(slug=slug)
+        except Article.DoesNotExist:
+            raise Http404
+        except:
+            raise Http404
 
     context = {
         # "object_list":article_queryset,
@@ -77,7 +62,19 @@ def article_create_view(request, id=None):
     if form.is_valid():
         article_object = form.save()
         context['form'] = ArticleForm()
+        return redirect(article_object.get_absolute_url())
         # context['object'] = article_object
         # context['created'] = True
 
     return render(request, "articles/create.html", context=context)
+
+
+def article_search_view(request):
+
+    query = request.GET.get('q')
+    qs = Article.objects.search(query=query)
+    context = {
+        "object_list":qs
+    }
+
+    return render(request, "articles/search.html", context=context)

@@ -2,14 +2,13 @@
 
 
 {% block content %}
-    <h1>{{title}}</h1>
-    <p>Some other text</p>
-    <p>{{content}}</p>
+    <h1>Welcome</h1>
 
+    <a href="{% url 'article-create' %}">Create and article</a>
 
     <ul>
         {% for x in object_list %}
-            <li><a href="/articles/{{x.id}}/">{{ x.title }} - {{x.content}}</a></li>
+            <li><a href="{{x.get_absolute_url}}">{{ x.title }}</a></li>
         {% endfor %}
     </ul>
 {% endblock content %}
